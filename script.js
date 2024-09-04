@@ -4,6 +4,8 @@ const heading = document.querySelector('h1');
 const switcher = document.querySelector('.switcher');
 const lightModeImage = document.querySelector('.light-mode');
 const darkModeImage = document.querySelector('.dark-mode');
+const smallLightModeImages = document.querySelectorAll('.small-image .light-mode');
+const smallDarkModeImages = document.querySelectorAll('.small-image .dark-mode');
 
 // let isDarkTheme = false;
 
@@ -14,10 +16,14 @@ if (isDarkTheme) {
     switcher.textContent = 'Light Theme';
     lightModeImage.style.display = 'none';
     darkModeImage.style.display = 'block';
+    smallLightModeImages.forEach(img => img.style.display = 'none');
+    smallDarkModeImages.forEach(img => img.style.display = 'block');
 } else {
     switcher.textContent = 'Dark Theme';
     lightModeImage.style.display = 'block';
     darkModeImage.style.display = 'none';
+    smallLightModeImages.forEach(img => img.style.display = 'block');
+    smallDarkModeImages.forEach(img => img.style.display = 'none');
 }
 
 switcher.addEventListener('click', () => {
@@ -28,6 +34,8 @@ switcher.addEventListener('click', () => {
         switcher.textContent = 'Light Theme';
         lightModeImage.style.display = 'none';
         darkModeImage.style.display = 'block';
+        smallLightModeImages.forEach(img => img.style.display = 'none');
+        smallDarkModeImages.forEach(img => img.style.display = 'block');
 
         // Зберегти тему в localStorage
         localStorage.setItem('theme', 'dark');
@@ -36,6 +44,8 @@ switcher.addEventListener('click', () => {
         switcher.textContent = 'Dark Theme';
         lightModeImage.style.display = 'block';
         darkModeImage.style.display = 'none';
+        smallLightModeImages.forEach(img => img.style.display = 'block');
+        smallDarkModeImages.forEach(img => img.style.display = 'none');
 
         // Зберегти тему в localStorage
         localStorage.setItem('theme', 'light');
