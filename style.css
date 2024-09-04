@@ -29,14 +29,24 @@ h1 {
     cursor: pointer;
 }
 
+.form {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+    /* width: 50%; */
+}
+
 #searchInput {
-    width: 40%;
-    padding: 10px;
+    width: 400px;
+    padding: 10px 150px 10px 10px;
     background-color: white;
     font-family: "Kanit", sans-serif;
     font-weight: 300;
     font-size: 16px;
-    margin: 15px auto;
+    margin: 15px 10px 15px 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
     display: flex;
@@ -47,6 +57,18 @@ h1 {
     outline: none;
     border-color: rgb(136, 136, 136);
     box-shadow: 0 0 10px rgba(220, 220, 220, 0.5);
+}
+
+#submit-btn {
+    font-size: 16px;
+    padding: 10px;
+    /* width: 5%; */
+    font-family: "Kanit", sans-serif;
+    font-weight: 300;
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 .container {
@@ -174,6 +196,11 @@ body.dark-theme h1 {
     color: white;
 }
 
+body.dark-theme #submit-btn {
+    color: black;
+    background-color: white;
+}
+
 body.dark-theme #searchInput {
     background-color: #333;
     color: white;
@@ -187,4 +214,8 @@ body.dark-theme .current-weather {
 
 body.dark-theme .additional-info p {
     color: white;
+}
+
+.empty {
+    visibility: hidden;
 }

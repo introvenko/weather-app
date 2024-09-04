@@ -12,11 +12,16 @@
     <script src="./script.js" defer></script>
 </head>
 <body>
+    
     <header>
+        <div class="empty">228</div>
         <h1>'t Weer</h1>
         <p class="switcher">Dark Theme</p>
     </header>
-    <input type="text" id="searchInput" placeholder="Discover the weather of your city, town, village">
+    <form class="form" action="submit">
+        <input type="text" id="searchInput" placeholder="Discover the weather of your city, town, village">
+        <button id="submit-btn">Search</button>
+    </form>
     <main>
         <div class="container">
             <section class="current-weather">
@@ -31,12 +36,12 @@
                         <p class="temperature">29°C</p>
                     </div>
                     <div class="additional-info">
-                        <p class="min-temp">Min: 16°C</p>
-                        <p class="max-temp">Max: 32°C</p>
-                        <p id="wind">Wind: 5km/h</p>
-                        <p id="humidity">Humidity: 75%</p>
-                        <p id="uv-index">UV-index: 3</p>
-                        <p id="pressure">Pressure: 1017mbar</p>
+                        <p class="min-temp">Min: </p>
+                        <p class="max-temp">Max: </p>
+                        <p id="wind">Wind: </p>
+                        <p id="sunrise">Sunrise: </p>
+                        <p id="sunset">Sunset: </p>
+                        <p id="feels-like">Feels like: </p>
                     </div>
                 </div>
             </section>
