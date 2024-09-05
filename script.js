@@ -6,28 +6,73 @@ const lightModeImage = document.querySelector('.light-mode');
 const darkModeImage = document.querySelector('.dark-mode');
 const smallLightModeImages = document.querySelectorAll('.small-image .light-mode');
 const smallDarkModeImages = document.querySelectorAll('.small-image .dark-mode');
+const searchInput = document.getElementById('searchInput');
+const submitBtn = document.getElementById('submit-btn');
+let lat = '';
+let lon = ''; 
+
 
 const container = document.querySelector('.container');
 // let isDarkTheme = false;
 
-async function loadWeather(e) {
+
+submitBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const city = searchInput.value.trim();  // Отримати введене місто
+    if (!city) return;
+    try {
+        // Отримуємо координати через OpenWeather Geocoding API
+        const geoData = await getCityCoordinates(city);
+        if (geoData) {
+            const { lat, lon } = geoData;
+            console.log(`Координати для ${city}: Latitude: ${lat}, Longitude: ${lon}`);
+            // Тут ви можете викликати функцію завантаження погоди або будь-які інші дії
+            loadWeather(lat, lon); // Викликати функцію завантаження погоди з новими координатами
+        } else {
+            console.log('Місто не знайдено');
+        }
+    } catch (error) {
+        console.error('Помилка під час отримання координат:', error);
+    }
+});
+
+// Функція для отримання координат міста через Geocoding API
+async function getCityCoordinates(city) {
+    const apiKey = '443c903fbc096e439e5db06f9d35ad05';
+    const geocodingUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`;
+
+    const response = await fetch(geocodingUrl);
+    const data = await response.json();
+
+    if (data.length > 0) {
+        return {
+            lat: data[0].lat,
+            lon: data[0].lon
+        };
+    } else {
+        return null;
+    }
+}
+
+
+// Оновлена функція для завантаження погоди
+async function loadWeather(lat, lon) {
+    const container = document.querySelector('.container');
     container.innerHTML = `
     <div class="container">
         <img src="weather/kOnzy.gif" alt="loading">
     </div>`;
 
-    const apiData = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid={443c903fbc096e439e5db06f9d35ad05}`;
+    const apiKey = '443c903fbc096e439e5db06f9d35ad05';
+    const apiData = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
 
-    const server = 'https://api.openweathermap.org/data/2.5/weather?lat=50.26487&lon=28.67669&appid=443c903fbc096e439e5db06f9d35ad05';
-    const response = await fetch(server, {
-        method: 'GET',
-    });
-    const responseResult = await response.json();
+    const response = await fetch(apiData);
+    const data = await response.json();
 
     if (response.ok) {
-        getWeather(responseResult);
+        getWeather(data);
     } else {
-        container.innerHTML = responseResult.message;
+        container.innerHTML = data.message;
     }
 }
 
@@ -103,6 +148,18 @@ switcher.addEventListener('click', () => {
         localStorage.setItem('theme', 'light');
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // switcher.addEventListener('click', () => {
