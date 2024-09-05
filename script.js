@@ -21,12 +21,11 @@ submitBtn.addEventListener('click', async (e) => {
     const city = searchInput.value.trim();  // Отримати введене місто
     if (!city) return;
     try {
-        // Отримуємо координати через OpenWeather Geocoding API
+        // Отримую координати через OpenWeather Geocoding API
         const geoData = await getCityCoordinates(city);
         if (geoData) {
             const { lat, lon } = geoData;
             console.log(`Координати для ${city}: Latitude: ${lat}, Longitude: ${lon}`);
-            // Тут ви можете викликати функцію завантаження погоди або будь-які інші дії
             loadWeather(lat, lon); // Викликати функцію завантаження погоди з новими координатами
         } else {
             console.log('Місто не знайдено');
@@ -54,8 +53,6 @@ async function getCityCoordinates(city) {
     }
 }
 
-
-// Оновлена функція для завантаження погоди
 async function loadWeather(lat, lon) {
     const container = document.querySelector('.container');
     container.innerHTML = `
@@ -134,7 +131,6 @@ switcher.addEventListener('click', () => {
         smallLightModeImages.forEach(img => img.style.display = 'none');
         smallDarkModeImages.forEach(img => img.style.display = 'block');
 
-        // Зберегти тему в localStorage
         localStorage.setItem('theme', 'dark');
     } else {
         body.classList.remove('dark-theme');
@@ -144,7 +140,6 @@ switcher.addEventListener('click', () => {
         smallLightModeImages.forEach(img => img.style.display = 'block');
         smallDarkModeImages.forEach(img => img.style.display = 'none');
 
-        // Зберегти тему в localStorage
         localStorage.setItem('theme', 'light');
     }
 });
