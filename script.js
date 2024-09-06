@@ -9,99 +9,104 @@ const smallDarkModeImages = document.querySelectorAll('.small-image .dark-mode')
 const searchInput = document.getElementById('searchInput');
 const submitBtn = document.getElementById('submit-btn');
 let lat = '';
-let lon = ''; 
-
+let lon = '';
+const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const container = document.querySelector('.container');
-// let isDarkTheme = false;
+const currentWeather = document.createElement('section');
+currentWeather.className = 'current-weather';
+console.log(currentWeather);
 
-
-submitBtn.addEventListener('click', async (e) => {
+submitBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    const city = searchInput.value.trim();  // Отримати введене місто
+    const city = searchInput.value.trim();
     if (!city) return;
-    try {
-        // Отримую координати через OpenWeather Geocoding API
-        const geoData = await getCityCoordinates(city);
-        if (geoData) {
-            const { lat, lon } = geoData;
-            console.log(`Координати для ${city}: Latitude: ${lat}, Longitude: ${lon}`);
-            loadWeather(lat, lon); // Викликати функцію завантаження погоди з новими координатами
-        } else {
-            console.log('Місто не знайдено');
-        }
-    } catch (error) {
-        console.error('Помилка під час отримання координат:', error);
-    }
+    getCityCoordinates(city)
+        .then(geoData => {
+            if (geoData) {
+                const { lat, lon, country, name } = geoData;
+                console.log(`Координати для ${name}: Latitude: ${lat}, Longitude: ${lon}, Країна: ${country}`);
+                loadWeather(lat, lon, name, country);  // Передаємо місто і країну
+            } else {
+                console.log('Місто не знайдено');
+            }
+        })
+        .catch(error => console.error('Помилка під час отримання координат:', error));
 });
 
-// Функція для отримання координат міста через Geocoding API
-async function getCityCoordinates(city) {
-    const apiKey = '443c903fbc096e439e5db06f9d35ad05';
-    const geocodingUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`;
-
-    const response = await fetch(geocodingUrl);
-    const data = await response.json();
-
-    if (data.length > 0) {
-        return {
-            lat: data[0].lat,
-            lon: data[0].lon
-        };
-    } else {
-        return null;
-    }
+function getCityCoordinates(city) {
+    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=10&language=en&format=json`;
+    return fetch(geocodingUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.results && data.results.length > 0) {
+                const { latitude, longitude, country, name } = data.results[0];
+                return { lat: latitude, lon: longitude, country, name };
+            } else {
+                return null;
+            }
+        })
+        .catch(error => {
+            console.error('Помилка під час отримання геокодування:', error);
+            return null;
+        });
 }
 
-async function loadWeather(lat, lon) {
-    const container = document.querySelector('.container');
-    container.innerHTML = `
-    <div class="container">
-        <img src="weather/kOnzy.gif" alt="loading">
-    </div>`;
+function loadWeather(lat, lon, city, country) {  // Додаємо параметр country
+    const apiData = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,rain,showers,snowfall,weather_code,visibility,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,rain_sum&timezone=auto`;
 
-    const apiKey = '443c903fbc096e439e5db06f9d35ad05';
-    const apiData = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-
-    const response = await fetch(apiData);
-    const data = await response.json();
-
-    if (response.ok) {
-        getWeather(data);
-    } else {
-        container.innerHTML = data.message;
-    }
+    fetch(apiData)
+        .then(response => response.json())
+        .then(data => {
+            console.log(apiData);
+            if (data) {
+                getWeather(data, city, country);  // Передаємо місто і країну у функцію getWeather
+            } else {
+                container.innerHTML = "Помилка отримання даних";
+            }
+        })
+        .catch(error => console.error('Помилка під час отримання даних погоди:', error));
 }
 
-function formatUnixTime(unixTime) {
-    const date = new Date(unixTime * 1000);
-
-    const hours = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
+function formatISOTime(isoTime) {
+    const date = new Date(isoTime); // Прямо створюємо об'єкт Date з ISO-строки
+    const hours = date.getHours(); // Використовуємо метод getHours для місцевого часу
+    const minutes = date.getMinutes();
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-function getWeather(data) {
+function getWeather(data, city, country) {  // Приймаємо параметр country
     console.log(data);
 
-    const location = data.name;
-    const temp = Math.round(data.main.temp);
-    const tempMin = Math.round(data.main.temp_min);
-    const tempMax = Math.round(data.main.temp_max);
-    const weatherStatus = data.weather[0].main;
-    const weatherIcon = data.weather[0].icon;
-    const country = data.sys.country;
-    const wind = data.wind.speed;
-    const sunrise = formatUnixTime(data.sys.sunrise);
-    const sunset = formatUnixTime(data.sys.sunset);
-    const feelsLike = Math.round(data.main.feels_like);
+    const temp = Math.round(data.current_weather.temperature);
+    const tempMin = Math.round(data.daily.temperature_2m_min[0]);
+    const tempMax = Math.round(data.daily.temperature_2m_max[0]);
+    const wind = data.current_weather.windspeed;
+    const sunrise = formatISOTime(data.daily.sunrise[0]);
+    const sunset = formatISOTime(data.daily.sunset[0]);
 
-    const template = ``
+    currentWeather.innerHTML = `<div class="weather-img">
+                    <img src="weather/cloudy.png" class="light-mode" alt="sun">
+                    <img src="weather/cloudy-dark.png" hidden class="dark-mode" alt="sun">
+                </div>
+                <div class="weather-info">
+                    <div class="city-and-degrees">
+                        <p id="country">${country}</p>  <!-- Використовуємо передану назву країни -->
+                        <p id="city">${city}</p>  <!-- Використовуємо передану назву міста -->
+                        <p class="temperature">${temp}°C</p>
+                    </div>
+                    <div class="additional-info">
+                        <p id="min-temp">Min: ${tempMin}°C</p>
+                        <p id="max-temp">Max: ${tempMax}°C</p>
+                        <p id="wind">Wind: ${wind} kmph</p>
+                        <p id="sunrise">Sunrise: ${sunrise}</p>
+                        <p id="sunset">Sunset: ${sunset}</p>
+                    </div>
+                </div>`;
 }
 
-// if (container) {
-//     loadWeather();
-// }
+console.log(currentWeather);
+container.prepend(currentWeather);
 
 let isDarkTheme = localStorage.getItem('theme') === 'dark';
 
@@ -143,6 +148,7 @@ switcher.addEventListener('click', () => {
         localStorage.setItem('theme', 'light');
     }
 });
+
 
 
 
