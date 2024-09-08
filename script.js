@@ -17,17 +17,17 @@ const currentWeather = document.createElement('section');
 currentWeather.className = 'current-weather';
 console.log(currentWeather);
 
-const weatherCodes = {
-    0: 'sun',            // Чисте небо
-    1: 'sunny',            // Переважно чисте небо
-    2: 'cloudy',          // Частково хмарно
-    3: 'overcast',          // Хмарно
-    45: 'fog',           // Туман
-    48: 'frosty', 
-    51: 'drizzle',       // Легкий мряка
-    61: 'rain',          // Легкий дощ
-    71: 'snow',          // Легкий снігопад
-    95: 'thunderstorm',  // Гроза
+const weatherDescriptions = {
+    0: 'clear',           // Чисте небо
+    1: 'mostly_clear',    // Переважно чисте небо
+    2: 'partly_cloudy',   // Частково хмарно
+    3: 'cloudy',          // Хмарно
+    45: 'fog',            // Туман
+    48: 'frost',          // Іній
+    51: 'drizzle',        // Легкий дощ
+    61: 'rain',           // Дощ
+    71: 'snow',           // Сніг
+    95: 'thunderstorm'    // Гроза
 };
 
 submitBtn.addEventListener('click', (e) => {
@@ -94,7 +94,8 @@ function formatISOTime(isoTime) {
 }
 
 function getWeather(data, city, country) {
-    const weatherDescription = data.current_weather.weather_code;
+    const weatherCode = data.daily.weather_code[0];
+    const description = weatherDescriptions[weatherCode] || 'unknown';
     const temp = Math.round(data.current_weather.temperature);
     const tempMin = Math.round(data.daily.temperature_2m_min[0]);
     const tempMax = Math.round(data.daily.temperature_2m_max[0]);
@@ -102,54 +103,54 @@ function getWeather(data, city, country) {
     const sunrise = formatISOTime(data.daily.sunrise[0]);
     const sunset = formatISOTime(data.daily.sunset[0]);
 
-    console.log(data);
+    console.log('Weather Code:', weatherCode);
+    console.log('Description:', description);
 
-    // Визначаємо шлях до зображення відповідно до опису погоди
+    // Вибір зображення на основі опису погоди та теми
     let weatherImage;
-    switch (weatherDescription) {
+    switch (description) {
         case 'clear':
-        case 'sun':
-            weatherImage = 'weather/sun.png';
+            weatherImage = isDarkTheme ? 'weather/sun-dark.png' : 'weather/sun.png';
             break;
-        case 'sunny':
-            weatherImage = 'weather/sunny.png';
+        case 'mostly_clear':
+            weatherImage = isDarkTheme ? 'weather/sunny-dark.png' : 'weather/sunny.png';
+            break;
+        case 'partly_cloudy':
+            weatherImage = isDarkTheme ? 'weather/cloudy-dark.png' : 'weather/cloudy.png';
             break;
         case 'cloudy':
-            weatherImage = 'weather/cloudy.png';
-            break;
-        case 'drizzle':
-            weatherImage = 'weather/drizzle.png';
-            break;
-        case 'rain':
-            weatherImage = 'weather/rain.png';
-            break;
-        case 'thunderstorm':
-            weatherImage = 'weather/thunderstorm.png';
-            break;
-        case 'snow':
-            weatherImage = 'weather/snowing.png';
-            break;
-        case 'overcast':
-            weatherImage = 'weather/overcast.png';
+            weatherImage = isDarkTheme ? 'weather/overcast-dark.png' : 'weather/overcast.png';
             break;
         case 'fog':
-            weatherImage = 'weather/fog.png';
+            weatherImage = isDarkTheme ? 'weather/fog-dark.png' : 'weather/fog.png';
             break;
-        case 'frosty':
-            weatherImage = 'weather/frosty.png';
+        case 'frost':
+            weatherImage = isDarkTheme ? 'weather/frosty-dark.png' : 'weather/frosty.png';
+            break;
+        case 'drizzle':
+            weatherImage = isDarkTheme ? 'weather/drizzle-dark.png' : 'weather/drizzle.png';
+            break;
+        case 'rain':
+            weatherImage = isDarkTheme ? 'weather/rain-dark.png' : 'weather/rain.png';
+            break;
+        case 'snow':
+            weatherImage = isDarkTheme ? 'weather/snowing-dark.png' : 'weather/snowing.png';
+            break;
+        case 'thunderstorm':
+            weatherImage = isDarkTheme ? 'weather/thunderstorm-dark.png' : 'weather/thunderstorm.png';
             break;
         default:
-            weatherImage = 'weather/kOnzy.gif'; // fallback зображення
+            weatherImage = isDarkTheme ? 'weather/kOnzy-dark.gif' : 'weather/kOnzy.gif'; // Дефолтне зображення
     }
 
     currentWeather.innerHTML = `<div class="weather-img">
-                    <img src="${weatherImage}" class="light-mode" alt="${weatherDescription}">
-                    <img src="${weatherImage.replace('.png', '-dark.png')}" hidden class="dark-mode" alt="${weatherDescription}">
+                    <img src="${weatherImage}" class="light-mode" alt="${description}">
+                    <img src="${weatherImage.replace('.png', '-dark.png')}" hidden class="dark-mode" alt="${description}">
                 </div>
                 <div class="weather-info">
                     <div class="city-and-degrees">
-                        <p id="country">${country}</p>  <!-- Використовуємо передану назву країни -->
-                        <p id="city">${city}</p>  <!-- Використовуємо передану назву міста -->
+                        <p id="country">${country}</p>
+                        <p id="city">${city}</p>
                         <p class="temperature">${temp}°C</p>
                     </div>
                     <div class="additional-info">
@@ -161,6 +162,7 @@ function getWeather(data, city, country) {
                     </div>
                 </div>`;
 }
+
 
 console.log(currentWeather);
 container.prepend(currentWeather);
