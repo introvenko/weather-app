@@ -111,8 +111,11 @@ function getWeather(data, city, country) {
         case 'sun':
             weatherImage = 'weather/sun.png';
             break;
+        case 'sunny':
+            weatherImage = 'weather/sunny.png';
+            break;
         case 'cloudy':
-            weatherImage = 'weather/cloud.png';
+            weatherImage = 'weather/cloudy.png';
             break;
         case 'drizzle':
             weatherImage = 'weather/drizzle.png';
@@ -125,6 +128,15 @@ function getWeather(data, city, country) {
             break;
         case 'snow':
             weatherImage = 'weather/snowing.png';
+            break;
+        case 'overcast':
+            weatherImage = 'weather/overcast.png';
+            break;
+        case 'fog':
+            weatherImage = 'weather/fog.png';
+            break;
+        case 'frosty':
+            weatherImage = 'weather/frosty.png';
             break;
         default:
             weatherImage = 'weather/kOnzy.gif'; // fallback зображення
