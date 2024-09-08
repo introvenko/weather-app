@@ -10,12 +10,12 @@ const searchInput = document.getElementById('searchInput');
 const submitBtn = document.getElementById('submit-btn');
 let lat = '';
 let lon = '';
-const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const helloImage = document.getElementById('hello-image'); 
 
 const container = document.querySelector('.container');
 const currentWeather = document.createElement('section');
 currentWeather.className = 'current-weather';
-console.log(currentWeather);
+currentWeather.prepend(helloImage);
 
 const weatherDescriptions = {
     0: 'clear',           // Чисте небо
@@ -27,7 +27,8 @@ const weatherDescriptions = {
     51: 'drizzle',        // Легкий дощ
     61: 'rain',           // Дощ
     71: 'snow',           // Сніг
-    95: 'thunderstorm'    // Гроза
+    95: 'thunderstorm',
+    default: 'unknown'    // Гроза
 };
 
 submitBtn.addEventListener('click', (e) => {
@@ -37,6 +38,11 @@ submitBtn.addEventListener('click', (e) => {
         container.innerHTML = "<p>Please enter a city name.</p>";
         return;
     }
+    
+    if (helloImage) {
+        helloImage.style.display = 'none';
+    }
+
     getCityCoordinates(city)
         .then(geoData => {
             if (geoData) {
@@ -77,6 +83,7 @@ async function loadWeather(lat, lon, city, country) {
         const data = await response.json();
         if (data) {
             getWeather(data, city, country);
+            getFutureWeather(data);
         } else {
             container.innerHTML = "Error fetching data";
         }
@@ -94,8 +101,8 @@ function formatISOTime(isoTime) {
 }
 
 function getWeather(data, city, country) {
-    const weatherCode = data.daily.weather_code[0];
-    const description = weatherDescriptions[weatherCode] || 'unknown';
+    const weatherCode = data.daily.weather_code[0]; // отримуємо код погоди
+    const description = weatherDescriptions[weatherCode] || 'oops'; // використовуємо 'oops', якщо опис не знайдений
     const temp = Math.round(data.current_weather.temperature);
     const tempMin = Math.round(data.daily.temperature_2m_min[0]);
     const tempMax = Math.round(data.daily.temperature_2m_max[0]);
@@ -106,73 +113,103 @@ function getWeather(data, city, country) {
     console.log('Weather Code:', weatherCode);
     console.log('Description:', description);
 
-    // Вибір зображення на основі опису погоди та теми
-    let weatherImage;
-    switch (description) {
-        case 'clear':
-            weatherImage = isDarkTheme ? 'weather/sun-dark.png' : 'weather/sun.png';
-            break;
-        case 'mostly_clear':
-            weatherImage = isDarkTheme ? 'weather/sunny-dark.png' : 'weather/sunny.png';
-            break;
-        case 'partly_cloudy':
-            weatherImage = isDarkTheme ? 'weather/cloudy-dark.png' : 'weather/cloudy.png';
-            break;
-        case 'cloudy':
-            weatherImage = isDarkTheme ? 'weather/overcast-dark.png' : 'weather/overcast.png';
-            break;
-        case 'fog':
-            weatherImage = isDarkTheme ? 'weather/fog-dark.png' : 'weather/fog.png';
-            break;
-        case 'frost':
-            weatherImage = isDarkTheme ? 'weather/frosty-dark.png' : 'weather/frosty.png';
-            break;
-        case 'drizzle':
-            weatherImage = isDarkTheme ? 'weather/drizzle-dark.png' : 'weather/drizzle.png';
-            break;
-        case 'rain':
-            weatherImage = isDarkTheme ? 'weather/rain-dark.png' : 'weather/rain.png';
-            break;
-        case 'snow':
-            weatherImage = isDarkTheme ? 'weather/snowing-dark.png' : 'weather/snowing.png';
-            break;
-        case 'thunderstorm':
-            weatherImage = isDarkTheme ? 'weather/thunderstorm-dark.png' : 'weather/thunderstorm.png';
-            break;
-        default:
-            weatherImage = isDarkTheme ? 'weather/kOnzy-dark.gif' : 'weather/kOnzy.gif'; // Дефолтне зображення
-    }
+    // Визначаємо шлях до зображення
+    let weatherImage = `weather/${description}.png`;
+    let darkWeatherImage = `weather/${description}-dark.png`;
 
-    currentWeather.innerHTML = `<div class="weather-img">
-                    <img src="${weatherImage}" class="light-mode" alt="${description}">
-                    <img src="${weatherImage.replace('.png', '-dark.png')}" hidden class="dark-mode" alt="${description}">
-                </div>
-                <div class="weather-info">
-                    <div class="city-and-degrees">
-                        <p id="country">${country}</p>
-                        <p id="city">${city}</p>
-                        <p class="temperature">${temp}°C</p>
-                    </div>
-                    <div class="additional-info">
-                        <p id="min-temp">Min: ${tempMin}°C</p>
-                        <p id="max-temp">Max: ${tempMax}°C</p>
-                        <p id="wind">Wind: ${wind} kmph</p>
-                        <p id="sunrise">Sunrise: ${sunrise}</p>
-                        <p id="sunset">Sunset: ${sunset}</p>
-                    </div>
-                </div>`;
+    // Якщо зображення не існує, заміняємо на дефолтне зображення oops.png
+    let defaultImage = 'weather/oops.png';
+    let defaultDarkImage = 'weather/oops-dark.png';
+
+    currentWeather.innerHTML = `
+        <div class="weather-img">
+            <img src="${weatherImage}" onerror="this.src='${defaultImage}'" class="light-mode" alt="${description}">
+            <img src="${darkWeatherImage}" onerror="this.src='${defaultDarkImage}'" hidden class="dark-mode" alt="${description}">
+        </div>
+        <div class="weather-info">
+            <div class="city-and-degrees">
+                <p id="country">${country}</p>
+                <p id="city">${city}</p>
+                <p class="temperature">${temp}°C</p>
+            </div>
+            <div class="additional-info">
+                <p id="min-temp">Min: ${tempMin}°C</p>
+                <p id="max-temp">Max: ${tempMax}°C</p>
+                <p id="wind">Wind: ${wind} kmph</p>
+                <p id="sunrise">Sunrise: ${sunrise}</p>
+                <p id="sunset">Sunset: ${sunset}</p>
+            </div>
+        </div>`;
+
+    updateWeatherImages();
 }
 
+function getFutureWeather(data) {
+    const futureWeatherSection = document.querySelector('.future-weather');
+    futureWeatherSection.classList.remove('hidden');
+
+    // Очищуємо вміст секції перед додаванням нових даних
+    futureWeatherSection.innerHTML = '';
+
+    const forecast = data.daily.weather_code.slice(1, 6); // Прогноз на 5 днів
+    const tempsMin = data.daily.temperature_2m_min.slice(1, 6);
+    const tempsMax = data.daily.temperature_2m_max.slice(1, 6);
+    const dates = data.daily.time.slice(1, 6).map(date => new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
+
+    forecast.forEach((code, index) => {
+        const description = weatherDescriptions[code] || 'unknown';
+        const lightImage = `weather/${description}.png`; // Світле зображення
+        const darkImage = `weather/${description}-dark.png`; // Темне зображення
+
+        // Використовуємо дефолтне зображення, якщо немає відповідного
+        const defaultLightImage = 'weather/default.png';
+        const defaultDarkImage = 'weather/default-dark.png';
+
+        const container = document.createElement('div');
+        container.className = 'small-container';
+
+        container.innerHTML = `
+            <div class="small-image">
+                <img src="${lightImage}" class="light-mode" alt="${description}" onerror="this.src='${defaultLightImage}'">
+                <img src="${darkImage}" class="dark-mode" hidden alt="${description}" onerror="this.src='${defaultDarkImage}'">
+            </div>
+            <div class="date-temp">
+                <p class="small-degree">${Math.round((tempsMin[index] + tempsMax[index]) / 2)}°C</p>
+                <p class="small-date">${dates[index]}</p>
+            </div>
+        `;
+
+        futureWeatherSection.appendChild(container);
+    });
+
+    updateWeatherImages(); // Оновлюємо зображення для майбутнього прогнозу
+}
 
 console.log(currentWeather);
 container.prepend(currentWeather);
+
+function updateWeatherImages() {
+    const weatherImages = document.querySelectorAll('.weather-img img, .small-image img');
+
+    weatherImages.forEach(img => {
+        const isDarkTheme = body.classList.contains('dark-theme');
+        let imageSrc = img.src.replace('-dark.png', '.png');  // У випадку якщо ми в темній темі і зображення світлої теми не було
+        imageSrc = isDarkTheme ? imageSrc.replace('.png', '-dark.png') : imageSrc;
+
+        // Якщо зображення не існує, замінюємо його на дефолтне
+        img.onerror = function() {
+            img.src = isDarkTheme ? 'weather/default-dark.png' : 'weather/default.png';
+        };
+
+        img.src = imageSrc;
+    });
+}
 
 function applyTheme(isDarkTheme) {
     if (isDarkTheme) {
         body.classList.add('dark-theme');
         switcher.textContent = 'Light Theme';
 
-        // Переключаємо зображення на темну тему
         lightModeImages.forEach(img => img.hidden = true);
         darkModeImages.forEach(img => img.hidden = false);
 
@@ -181,18 +218,18 @@ function applyTheme(isDarkTheme) {
         body.classList.remove('dark-theme');
         switcher.textContent = 'Dark Theme';
 
-        // Переключаємо зображення на світлу тему
         lightModeImages.forEach(img => img.hidden = false);
         darkModeImages.forEach(img => img.hidden = true);
 
         localStorage.setItem('theme', 'light');
     }
+
+    updateWeatherImages();
 }
 
 let isDarkTheme = localStorage.getItem('theme') === 'dark';
 applyTheme(isDarkTheme);
 
-// Обробник кліку для перемикання теми
 switcher.addEventListener('click', () => {
     isDarkTheme = !isDarkTheme;
     applyTheme(isDarkTheme);
