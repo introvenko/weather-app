@@ -19,33 +19,16 @@
         <p class="switcher">Dark Theme</p>
     </header>
     <form class="form" action="submit">
-        <input type="text" id="searchInput" placeholder="Discover the weather of your city, town, village">
+        <label for="searchInput">Enter City:</label>
+        <input type="text" id="searchInput" placeholder="Discover the weather of your city, town, village" aria-label="Enter city name">
         <button id="submit-btn">Search</button>
     </form>
     <main>
         <div class="container">
-            <!-- <section class="current-weather">
-                <div class="weather-img">
-                    <img src="weather/cloudy.png" class="light-mode" alt="sun">
-                    <img src="weather/cloudy-dark.png" hidden class="dark-mode" alt="sun">
-                </div>
-                <div class="weather-info">
-                    <div class="city-and-degrees">
-                        <p id="country">Ukraine</p>
-                        <p id="city">Zhytomyr</p>
-                        <p class="temperature">29°C</p>
-                    </div>
-                    <div class="additional-info">
-                        <p class="min-temp">Min: </p>
-                        <p class="max-temp">Max: </p>
-                        <p id="wind">Wind: </p>
-                        <p id="sunrise">Sunrise: </p>
-                        <p id="sunset">Sunset: </p>
-                        <p id="feels-like">Feels like: </p>
-                    </div>
-                </div>
-            </section> -->
-            <section class="future-weather">
+            <section class="future-weather" role="region" aria-labelledby="weather-forecast-heading">
+                <h2 id="weather-forecast-heading">5-day Weather Forecast</h2>
+            </section>
+            <!-- <section class="future-weather">
                 <div class="small-container">
                     <div class="small-image">
                         <img src="weather/sun.png" class="light-mode" alt="sun">
@@ -95,7 +78,7 @@
                         <p class="small-degree">19°C</p>
                         <p class="small-date">Sept 9</p>
                     </div>
-                </div>
+                </div> -->
             </section>
         </div>
     </main>

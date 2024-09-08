@@ -2,8 +2,8 @@ const body = document.body;
 const header = document.querySelector('header');
 const heading = document.querySelector('h1');
 const switcher = document.querySelector('.switcher');
-const lightModeImage = document.querySelector('.light-mode');
-const darkModeImage = document.querySelector('.dark-mode');
+const lightModeImages = document.querySelectorAll('.light-mode');  // Всі світлі зображення
+const darkModeImages = document.querySelectorAll('.dark-mode'); 
 const smallLightModeImages = document.querySelectorAll('.small-image .light-mode');
 const smallDarkModeImages = document.querySelectorAll('.small-image .dark-mode');
 const searchInput = document.getElementById('searchInput');
@@ -17,67 +17,84 @@ const currentWeather = document.createElement('section');
 currentWeather.className = 'current-weather';
 console.log(currentWeather);
 
+const weatherCodes = {
+    0: 'sun',            // Чисте небо
+    1: 'sunny',            // Переважно чисте небо
+    2: 'cloudy',          // Частково хмарно
+    3: 'overcast',          // Хмарно
+    45: 'fog',           // Туман
+    48: 'frosty', 
+    51: 'drizzle',       // Легкий мряка
+    61: 'rain',          // Легкий дощ
+    71: 'snow',          // Легкий снігопад
+    95: 'thunderstorm',  // Гроза
+};
+
 submitBtn.addEventListener('click', (e) => {
     e.preventDefault();
     const city = searchInput.value.trim();
-    if (!city) return;
+    if (!city) {
+        container.innerHTML = "<p>Please enter a city name.</p>";
+        return;
+    }
     getCityCoordinates(city)
         .then(geoData => {
             if (geoData) {
                 const { lat, lon, country, name } = geoData;
-                console.log(`Координати для ${name}: Latitude: ${lat}, Longitude: ${lon}, Країна: ${country}`);
-                loadWeather(lat, lon, name, country);  // Передаємо місто і країну
+                loadWeather(lat, lon, name, country);
             } else {
-                console.log('Місто не знайдено');
-            }
-        })
-        .catch(error => console.error('Помилка під час отримання координат:', error));
-});
-
-function getCityCoordinates(city) {
-    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=10&language=en&format=json`;
-    return fetch(geocodingUrl)
-        .then(response => response.json())
-        .then(data => {
-            if (data.results && data.results.length > 0) {
-                const { latitude, longitude, country, name } = data.results[0];
-                return { lat: latitude, lon: longitude, country, name };
-            } else {
-                return null;
+                container.innerHTML = "<p>City not found. Please try again.</p>";
             }
         })
         .catch(error => {
-            console.error('Помилка під час отримання геокодування:', error);
-            return null;
+            container.innerHTML = "<p>Error fetching data. Please try again later.</p>";
+            console.error('Error:', error);
         });
+});
+
+async function getCityCoordinates(city) {
+    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=10&language=en&format=json`;
+    try {
+        const response = await fetch(geocodingUrl);
+        const data = await response.json();
+        if (data.results && data.results.length > 0) {
+            const { latitude, longitude, country, name } = data.results[0];
+            return { lat: latitude, lon: longitude, country, name };
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching geolocation:', error);
+        return null;
+    }
 }
 
-function loadWeather(lat, lon, city, country) {  // Додаємо параметр country
-    const apiData = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,rain,showers,snowfall,weather_code,visibility,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,rain_sum&timezone=auto`;
+async function loadWeather(lat, lon, city, country) {
+    const apiData = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,rain,showers,snowfall,weather_code,visibility,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,rain_sum,showers_sum,snowfall_sum&timezone=auto`;
 
-    fetch(apiData)
-        .then(response => response.json())
-        .then(data => {
-            console.log(apiData);
-            if (data) {
-                getWeather(data, city, country);  // Передаємо місто і країну у функцію getWeather
-            } else {
-                container.innerHTML = "Помилка отримання даних";
-            }
-        })
-        .catch(error => console.error('Помилка під час отримання даних погоди:', error));
+    try {
+        const response = await fetch(apiData);
+        const data = await response.json();
+        if (data) {
+            getWeather(data, city, country);
+        } else {
+            container.innerHTML = "Error fetching data";
+        }
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+    }
 }
+
 
 function formatISOTime(isoTime) {
-    const date = new Date(isoTime); // Прямо створюємо об'єкт Date з ISO-строки
-    const hours = date.getHours(); // Використовуємо метод getHours для місцевого часу
+    const date = new Date(isoTime);
+    const hours = date.getHours();
     const minutes = date.getMinutes();
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-function getWeather(data, city, country) {  // Приймаємо параметр country
-    console.log(data);
-
+function getWeather(data, city, country) {
+    const weatherDescription = data.current_weather.weather_code;
     const temp = Math.round(data.current_weather.temperature);
     const tempMin = Math.round(data.daily.temperature_2m_min[0]);
     const tempMax = Math.round(data.daily.temperature_2m_max[0]);
@@ -85,9 +102,37 @@ function getWeather(data, city, country) {  // Приймаємо парамет
     const sunrise = formatISOTime(data.daily.sunrise[0]);
     const sunset = formatISOTime(data.daily.sunset[0]);
 
+    console.log(data);
+
+    // Визначаємо шлях до зображення відповідно до опису погоди
+    let weatherImage;
+    switch (weatherDescription) {
+        case 'clear':
+        case 'sun':
+            weatherImage = 'weather/sun.png';
+            break;
+        case 'cloudy':
+            weatherImage = 'weather/cloud.png';
+            break;
+        case 'drizzle':
+            weatherImage = 'weather/drizzle.png';
+            break;
+        case 'rain':
+            weatherImage = 'weather/rain.png';
+            break;
+        case 'thunderstorm':
+            weatherImage = 'weather/thunderstorm.png';
+            break;
+        case 'snow':
+            weatherImage = 'weather/snowing.png';
+            break;
+        default:
+            weatherImage = 'weather/kOnzy.gif'; // fallback зображення
+    }
+
     currentWeather.innerHTML = `<div class="weather-img">
-                    <img src="weather/cloudy.png" class="light-mode" alt="sun">
-                    <img src="weather/cloudy-dark.png" hidden class="dark-mode" alt="sun">
+                    <img src="${weatherImage}" class="light-mode" alt="${weatherDescription}">
+                    <img src="${weatherImage.replace('.png', '-dark.png')}" hidden class="dark-mode" alt="${weatherDescription}">
                 </div>
                 <div class="weather-info">
                     <div class="city-and-degrees">
@@ -108,75 +153,33 @@ function getWeather(data, city, country) {  // Приймаємо парамет
 console.log(currentWeather);
 container.prepend(currentWeather);
 
-let isDarkTheme = localStorage.getItem('theme') === 'dark';
-
-if (isDarkTheme) {
-    body.classList.add('dark-theme');
-    switcher.textContent = 'Light Theme';
-    lightModeImage.style.display = 'none';
-    darkModeImage.style.display = 'block';
-    smallLightModeImages.forEach(img => img.style.display = 'none');
-    smallDarkModeImages.forEach(img => img.style.display = 'block');
-} else {
-    switcher.textContent = 'Dark Theme';
-    lightModeImage.style.display = 'block';
-    darkModeImage.style.display = 'none';
-    smallLightModeImages.forEach(img => img.style.display = 'block');
-    smallDarkModeImages.forEach(img => img.style.display = 'none');
-}
-
-switcher.addEventListener('click', () => {
-    isDarkTheme = !isDarkTheme;
-
+function applyTheme(isDarkTheme) {
     if (isDarkTheme) {
         body.classList.add('dark-theme');
         switcher.textContent = 'Light Theme';
-        lightModeImage.style.display = 'none';
-        darkModeImage.style.display = 'block';
-        smallLightModeImages.forEach(img => img.style.display = 'none');
-        smallDarkModeImages.forEach(img => img.style.display = 'block');
+
+        // Переключаємо зображення на темну тему
+        lightModeImages.forEach(img => img.hidden = true);
+        darkModeImages.forEach(img => img.hidden = false);
 
         localStorage.setItem('theme', 'dark');
     } else {
         body.classList.remove('dark-theme');
         switcher.textContent = 'Dark Theme';
-        lightModeImage.style.display = 'block';
-        darkModeImage.style.display = 'none';
-        smallLightModeImages.forEach(img => img.style.display = 'block');
-        smallDarkModeImages.forEach(img => img.style.display = 'none');
+
+        // Переключаємо зображення на світлу тему
+        lightModeImages.forEach(img => img.hidden = false);
+        darkModeImages.forEach(img => img.hidden = true);
 
         localStorage.setItem('theme', 'light');
     }
+}
+
+let isDarkTheme = localStorage.getItem('theme') === 'dark';
+applyTheme(isDarkTheme);
+
+// Обробник кліку для перемикання теми
+switcher.addEventListener('click', () => {
+    isDarkTheme = !isDarkTheme;
+    applyTheme(isDarkTheme);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// switcher.addEventListener('click', () => {
-//     if (isDarkTheme) {
-//         body.style.backgroundColor = 'white';
-//         header.style.borderBottom = '1px solid rgb(183, 183, 183)';
-//         heading.style.color = 'black';
-//         switcher.style.color = 'black';
-//         switcher.textContent = 'Dark Theme';
-//         isDarkTheme = false;
-//     } else {
-//         body.style.backgroundColor = 'black';
-//         header.style.borderBottom = '1px solid white';
-//         heading.style.color = 'white';
-//         switcher.style.color = 'white';
-//         switcher.textContent = 'Light Theme';
-//         isDarkTheme = true;
-//     }
-// });
