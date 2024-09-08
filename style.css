@@ -4,6 +4,7 @@ body {
     background-color: white;
     font-family: "Kanit", sans-serif;
     font-style: normal;
+    height: 100%;
 }
 
 header {
@@ -41,7 +42,6 @@ h1 {
     align-items: center;
     gap: 10px;
     margin: 0 auto;
-    /* width: 50%; */
 }
 
 #searchInput {
@@ -98,10 +98,6 @@ h1 {
     height: 100%;
     width: 50%;
 }
-
-/* .weather-img img {
-    text-align: center;
-} */
 
 .weather-info {
     width: 50%;
@@ -248,4 +244,118 @@ body.dark-theme #sunset,
 body.dark-theme #sunrise {
     background-color: #333;
     border: 1px solid #fffcb9;
+}
+
+footer {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 450px) {
+    .empty {
+        display: none;
+    }
+
+    body {
+        overflow-y: hidden;
+    }
+
+    h1 {
+        padding-left: 30px;
+    }
+    
+    .switcher {
+        padding-right: 30px;
+    }
+    
+    .form {
+        padding-left: 10px;
+    }
+    
+    #searchInput {
+        width: 150px;
+        padding: 10px 5px 10px 5px;
+    }
+
+    #hello-image {
+        width: 310px;
+        height: 230px;
+    }
+    
+    .container {
+        width: 100%;
+        height: auto;
+        padding: 0;
+    }
+
+    .container #hello-image {
+        padding-left: 65px;
+        padding-bottom: 280px;
+    }
+    
+    .current-weather {
+        height: 50%;
+        align-items: center;     /* Центрує по вертикалі */
+    }
+
+    .weather-img {
+        display: flex;
+        justify-content: center; /* Центрує по горизонталі */
+        align-items: center;     /* Центрує по вертикалі */
+        height: 100%;  
+    }
+
+    .weather-img img {
+        width: 60%;
+        height: auto;
+    }
+    
+    #country {
+        font-size: 10px;
+    }
+    
+    #city {
+        font-size: 30px;
+    }
+    
+    .temperature {
+        font-size: 100px;
+    }
+    
+    .additional-info {
+        width: 200px;
+    }
+    
+    .additional-info p {
+        font-size: 12px;
+    }
+    
+    .future-weather {
+        width: 80%;
+        margin: 50px auto;
+    }
+    
+    .small-container {
+        width: 20%;
+        height: 100%;
+    }
+    
+    .small-image img {
+        width: 35px;
+        margin-top: 10px;
+    }
+    
+    .date-temp {
+        margin-top: 0;
+    }
+    
+    .small-degree {
+        font-size: 20px;
+        text-align: center;
+        margin-bottom: 0;
+    }
+    
+    .small-date {
+        font-size: 10px;
+    }
 }
