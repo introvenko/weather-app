@@ -2,7 +2,7 @@ const body = document.body;
 const header = document.querySelector('header');
 const heading = document.querySelector('h1');
 const switcher = document.querySelector('.switcher');
-const lightModeImages = document.querySelectorAll('.light-mode');  // Всі світлі зображення
+const lightModeImages = document.querySelectorAll('.light-mode');
 const darkModeImages = document.querySelectorAll('.dark-mode'); 
 const smallLightModeImages = document.querySelectorAll('.small-image .light-mode');
 const smallDarkModeImages = document.querySelectorAll('.small-image .dark-mode');
@@ -11,24 +11,23 @@ const submitBtn = document.getElementById('submit-btn');
 let lat = '';
 let lon = '';
 const helloImage = document.getElementById('hello-image'); 
-
 const container = document.querySelector('.container');
 const currentWeather = document.createElement('section');
 currentWeather.className = 'current-weather';
 currentWeather.prepend(helloImage);
 
 const weatherDescriptions = {
-    0: 'clear',           // Чисте небо
-    1: 'mostly_clear',    // Переважно чисте небо
-    2: 'partly_cloudy',   // Частково хмарно
-    3: 'cloudy',          // Хмарно
-    45: 'fog',            // Туман
-    48: 'frost',          // Іній
-    51: 'drizzle',        // Легкий дощ
-    61: 'rain',           // Дощ
-    71: 'snow',           // Сніг
+    0: 'clear',
+    1: 'mostly_clear',
+    2: 'partly_cloudy',
+    3: 'cloudy',
+    45: 'fog',
+    48: 'frost',
+    51: 'drizzle',
+    61: 'rain',
+    71: 'snow',
     95: 'thunderstorm',
-    default: 'unknown'    // Гроза
+    default: 'unknown'
 };
 
 submitBtn.addEventListener('click', (e) => {
@@ -101,8 +100,8 @@ function formatISOTime(isoTime) {
 }
 
 function getWeather(data, city, country) {
-    const weatherCode = data.daily.weather_code[0]; // отримуємо код погоди
-    const description = weatherDescriptions[weatherCode] || 'oops'; // використовуємо 'oops', якщо опис не знайдений
+    const weatherCode = data.daily.weather_code[0];
+    const description = weatherDescriptions[weatherCode] || 'oops';
     const temp = Math.round(data.current_weather.temperature);
     const tempMin = Math.round(data.daily.temperature_2m_min[0]);
     const tempMax = Math.round(data.daily.temperature_2m_max[0]);
@@ -113,11 +112,9 @@ function getWeather(data, city, country) {
     console.log('Weather Code:', weatherCode);
     console.log('Description:', description);
 
-    // Визначаємо шлях до зображення
     let weatherImage = `weather/${description}.png`;
     let darkWeatherImage = `weather/${description}-dark.png`;
 
-    // Якщо зображення не існує, заміняємо на дефолтне зображення oops.png
     let defaultImage = 'weather/oops.png';
     let defaultDarkImage = 'weather/oops-dark.png';
 
@@ -148,20 +145,18 @@ function getFutureWeather(data) {
     const futureWeatherSection = document.querySelector('.future-weather');
     futureWeatherSection.classList.remove('hidden');
 
-    // Очищуємо вміст секції перед додаванням нових даних
     futureWeatherSection.innerHTML = '';
 
-    const forecast = data.daily.weather_code.slice(1, 6); // Прогноз на 5 днів
+    const forecast = data.daily.weather_code.slice(1, 6);
     const tempsMin = data.daily.temperature_2m_min.slice(1, 6);
     const tempsMax = data.daily.temperature_2m_max.slice(1, 6);
     const dates = data.daily.time.slice(1, 6).map(date => new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
 
     forecast.forEach((code, index) => {
         const description = weatherDescriptions[code] || 'unknown';
-        const lightImage = `weather/${description}.png`; // Світле зображення
-        const darkImage = `weather/${description}-dark.png`; // Темне зображення
+        const lightImage = `weather/${description}.png`;
+        const darkImage = `weather/${description}-dark.png`;
 
-        // Використовуємо дефолтне зображення, якщо немає відповідного
         const defaultLightImage = 'weather/default.png';
         const defaultDarkImage = 'weather/default-dark.png';
 
@@ -182,7 +177,7 @@ function getFutureWeather(data) {
         futureWeatherSection.appendChild(container);
     });
 
-    updateWeatherImages(); // Оновлюємо зображення для майбутнього прогнозу
+    updateWeatherImages();
 }
 
 console.log(currentWeather);
@@ -193,10 +188,9 @@ function updateWeatherImages() {
 
     weatherImages.forEach(img => {
         const isDarkTheme = body.classList.contains('dark-theme');
-        let imageSrc = img.src.replace('-dark.png', '.png');  // У випадку якщо ми в темній темі і зображення світлої теми не було
+        let imageSrc = img.src.replace('-dark.png', '.png');
         imageSrc = isDarkTheme ? imageSrc.replace('.png', '-dark.png') : imageSrc;
 
-        // Якщо зображення не існує, замінюємо його на дефолтне
         img.onerror = function() {
             img.src = isDarkTheme ? 'weather/default-dark.png' : 'weather/default.png';
         };
