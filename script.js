@@ -1,6 +1,4 @@
 const body = document.body;
-const header = document.querySelector('header');
-const heading = document.querySelector('h1');
 const switcher = document.querySelector('.switcher');
 const lightModeImages = document.querySelectorAll('.light-mode');
 const darkModeImages = document.querySelectorAll('.dark-mode'); 
@@ -24,9 +22,15 @@ const weatherDescriptions = {
     45: 'fog',
     48: 'frost',
     51: 'drizzle',
+    53: 'light_drizzle',
+    55: 'heavy_drizzle',
     61: 'rain',
+    63: 'shower',
     71: 'snow',
+    80: 'rain_shower',
+    81: 'rain_showers_moderate',
     95: 'thunderstorm',
+    96: 'hail',
     default: 'unknown'
 };
 
@@ -180,7 +184,6 @@ function getFutureWeather(data) {
     updateWeatherImages();
 }
 
-console.log(currentWeather);
 container.prepend(currentWeather);
 
 function updateWeatherImages() {
