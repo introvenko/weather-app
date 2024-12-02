@@ -45,6 +45,10 @@ h1 {
     margin: 0 auto;
 }
 
+.weather-heading {
+    justify-content: center;
+}
+
 #searchInput {
     width: 400px;
     padding: 10px 150px 10px 10px;
@@ -247,6 +251,9 @@ body.dark-theme #sunrise {
 footer {
     text-align: center;
     margin-bottom: 15px;
+    padding-top: 20px;
+    width: 100%;
+    border-top: 1px solid rgb(183, 183, 183);
 }
 
 @media (max-width: 450px) {
